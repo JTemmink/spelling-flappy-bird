@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Spelling Flappy Bird</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .header {
+            background: #2196F3;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header h1 {
+            margin: 0;
+        }
+        
+        .logout-btn {
+            background: #F44336;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .logout-btn:hover {
+            background: #D32F2F;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin: 20px 0;
+        }
+        
+        .tab {
+            background: #E0E0E0;
+            color: #333;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            border: none;
+            font-size: 16px;
+        }
+        
+        .tab.active {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .tab:hover {
+            background: #BDBDBD;
+        }
+        
+        .tab.active:hover {
+            background: #45A049;
+        }
+        
+        .tab-content {
+            display: none;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 8px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+        
+        .btn-primary {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #45A049;
+        }
+        
+        .btn-danger {
+            background: #F44336;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #D32F2F;
+        }
+        
+        .btn-secondary {
+            background: #2196F3;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #1976D2;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        
+        th {
+            background: #f5f5f5;
+            font-weight: bold;
+        }
+        
+        tr:hover {
+            background: #f9f9f9;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .stat-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #2196F3;
+        }
+        
+        .stat-card h3 {
+            margin-top: 0;
+            color: #2196F3;
+        }
+        
+        .file-input {
+            margin: 20px 0;
+        }
+        
+        .file-input input[type="file"] {
+            margin-bottom: 10px;
+        }
+        
+        .preview {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin-top: 10px;
+            min-height: 50px;
+        }
+        
+        .error {
+            color: #F44336;
+            background: #ffebee;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+        
+        .success {
+            color: #4CAF50;
+            background: #e8f5e8;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 50%;
+            max-width: 500px;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .close:hover {
+            color: black;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Admin Panel - Spelling Flappy Bird</h1>
+        <div>
+            <span id="current-user"></span>
+            <button class="logout-btn" onclick="logout()">Uitloggen</button>
+        </div>
+    </div>
+
+    <div class="tabs">
+        <button class="tab active" onclick="showTab('words')">Woorden Beheren</button>
+        <button class="tab" onclick="showTab('stats')">Statistieken</button>
+        <button class="tab" onclick="showTab('import')">Bulk Import</button>
+    </div>
+
+    <!-- Word Management Section -->
+    <div id="words" class="tab-content active">
+        <h2>Woorden Beheren</h2>
+        
+        <form id="add-word-form" onsubmit="addWord(event)">
+            <h3>Nieuw Woord Toevoegen</h3>
+            <div class="form-group">
+                <label for="correct-input">Correcte Spelling:</label>
+                <input type="text" id="correct-input" required>
+            </div>
+            <div class="form-group">
+                <label for="wrong-input">Foutieve Spelling:</label>
+                <input type="text" id="wrong-input" required>
+            </div>
+            <div class="form-group">
+                <label for="difficulty-select">Moeilijkheid:</label>
+                <select id="difficulty-select" required>
+                    <option value="easy">Makkelijk</option>
+                    <option value="medium">Gemiddeld</option>
+                    <option value="hard">Moeilijk</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Woord Toevoegen</button>
+        </form>
+
+        <h3>Bestaande Woorden</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th>Correcte Spelling</th>
+                    <th>Foutieve Spelling</th>
+                    <th>Moeilijkheid</th>
+                    <th>Acties</th>
+                </tr>
+            </thead>
+            <tbody id="words-table-body">
+                <!-- Words will be loaded here -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Statistics Section -->
+    <div id="stats" class="tab-content">
+        <h2>Woord Statistieken</h2>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3>Meest Moeilijke Woorden</h3>
+                <div id="difficult-words">
+                    <p>Laden...</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <h3>Meest Geoefende Woorden</h3>
+                <div id="practiced-words">
+                    <p>Laden...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bulk Import Section -->
+    <div id="import" class="tab-content">
+        <h2>Bulk Import</h2>
+        
+        <div class="file-input">
+            <label for="csv-file">CSV Bestand Uploaden:</label>
+            <input type="file" id="csv-file" accept=".csv" onchange="importCSV(event)">
+            <p><strong>CSV Format:</strong> correct,wrong,difficulty (één woord per regel)</p>
+            <p><strong>Voorbeeld:</strong><br>
+            kat,katte,easy<br>
+            hond,hont,medium<br>
+            fiets,fiet,hard</p>
+        </div>
+
+        <div class="preview" id="csv-preview">
+            Geen bestand geselecteerd.
+        </div>
+
+        <button class="btn btn-secondary" onclick="executeBulkImport()">Import Uitvoeren</button>
+    </div>
+
+    <!-- Edit Word Modal -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Woord Bewerken</h3>
+                <span class="close" onclick="closeEditModal()">&times;</span>
+            </div>
+            <form id="edit-word-form" onsubmit="updateWord(event)">
+                <div class="form-group">
+                    <label for="edit-correct-input">Correcte Spelling:</label>
+                    <input type="text" id="edit-correct-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-wrong-input">Foutieve Spelling:</label>
+                    <input type="text" id="edit-wrong-input" required>
+                </div>
+                <div class="form-group">
+                    <label for="edit-difficulty-select">Moeilijkheid:</label>
+                    <select id="edit-difficulty-select" required>
+                        <option value="easy">Makkelijk</option>
+                        <option value="medium">Gemiddeld</option>
+                        <option value="hard">Moeilijk</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Bijwerken</button>
+                <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Annuleren</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Supabase client
+        const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+        const { createClient } = window.supabase;
+        const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Admin email check
+        const ADMIN_EMAIL = 'admin@example.com'; // Replace with actual admin email
+
+        // Check authentication on page load
+        async function checkAuth() {
+            const { data: { user } } = await supabaseClient.auth.getUser();
+            if (!user) {
+                alert('Je moet ingelogd zijn om deze pagina te bekijken.');
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            // Check if user is admin
+            if (user.email !== ADMIN_EMAIL) {
+                alert('Je hebt geen toegang tot deze pagina.');
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            // Display current user
+            document.getElementById('current-user').textContent = `Ingelogd als: ${user.email}`;
+            
+            // Load initial data
+            await loadWords();
+            await loadStats();
+        }
+
+        // Load words from database
+        async function loadWords() {
+            const { data: words, error } = await supabaseClient
+                .from('words')
+                .select('*')
+                .order('created_at', { ascending: false });
+            
+            if (error) {
+                console.error('Error loading words:', error);
+                showError('Fout bij laden woorden: ' + error.message);
+                return;
+            }
+            
+            // Populate table
+            const tbody = document.getElementById('words-table-body');
+            tbody.innerHTML = '';
+            
+            words.forEach(word => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${word.correct_spelling}</td>
+                    <td>${word.wrong_spelling}</td>
+                    <td>${word.difficulty}</td>
+                    <td>
+                        <button class="btn btn-primary" onclick="editWord('${word.id}')">Bewerken</button>
+                        <button class="btn btn-danger" onclick="deleteWord('${word.id}')">Verwijderen</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        // Add new word
+        async function addWord(event) {
+            event.preventDefault();
+            
+            const correct = document.getElementById('correct-input').value;
+            const wrong = document.getElementById('wrong-input').value;
+            const difficulty = document.getElementById('difficulty-select').value;
+            
+            const { error } = await supabaseClient
+                .from('words')
+                .insert([{ correct_spelling: correct, wrong_spelling: wrong, difficulty }]);
+            
+            if (error) {
+                showError('Fout bij toevoegen: ' + error.message);
+                return;
+            }
+            
+            showSuccess('Woord toegevoegd!');
+            document.getElementById('add-word-form').reset();
+            await loadWords();
+        }
+
+        // Delete word
+        async function deleteWord(wordId) {
+            if (!confirm('Weet je zeker dat je dit woord wilt verwijderen?')) return;
+            
+            const { error } = await supabaseClient
+                .from('words')
+                .delete()
+                .eq('id', wordId);
+            
+            if (error) {
+                showError('Fout bij verwijderen: ' + error.message);
+                return;
+            }
+            
+            showSuccess('Woord verwijderd!');
+            await loadWords();
+        }
+
+        // Edit word - open modal and load word data
+        async function editWord(wordId) {
+            // Load word data from database
+            const { data: word, error } = await supabaseClient
+                .from('words')
+                .select('*')
+                .eq('id', wordId)
+                .single();
+            
+            if (error) {
+                showError('Fout bij laden woord: ' + error.message);
+                return;
+            }
+            
+            // Populate form with existing data
+            document.getElementById('edit-correct-input').value = word.correct_spelling;
+            document.getElementById('edit-wrong-input').value = word.wrong_spelling;
+            document.getElementById('edit-difficulty-select').value = word.difficulty;
+            
+            // Store word ID for update
+            document.getElementById('edit-word-form').dataset.wordId = wordId;
+            
+            // Show modal
+            document.getElementById('editModal').style.display = 'block';
+        }
+
+        // Update word
+        async function updateWord(event) {
+            event.preventDefault();
+            
+            const wordId = document.getElementById('edit-word-form').dataset.wordId;
+            const correct = document.getElementById('edit-correct-input').value;
+            const wrong = document.getElementById('edit-wrong-input').value;
+            const difficulty = document.getElementById('edit-difficulty-select').value;
+            
+            const { error } = await supabaseClient
+                .from('words')
+                .update({ 
+                    correct_spelling: correct, 
+                    wrong_spelling: wrong, 
+                    difficulty: difficulty 
+                })
+                .eq('id', wordId);
+            
+            if (error) {
+                showError('Fout bij bijwerken: ' + error.message);
+                return;
+            }
+            
+            showSuccess('Woord bijgewerkt!');
+            closeEditModal();
+            await loadWords();
+        }
+
+        // Close edit modal
+        function closeEditModal() {
+            document.getElementById('editModal').style.display = 'none';
+            document.getElementById('edit-word-form').reset();
+            delete document.getElementById('edit-word-form').dataset.wordId;
+        }
+
+        // Load statistics
+        async function loadStats() {
+            // Load most difficult words (lowest accuracy)
+            const { data: difficultWords, error: difficultError } = await supabaseClient
+                .from('word_stats')
+                .select(`
+                    words!inner(correct_spelling, wrong_spelling),
+                    correct_count,
+                    wrong_count
+                `)
+                .order('wrong_count', { ascending: false })
+                .limit(5);
+            
+            if (!difficultError && difficultWords) {
+                const difficultDiv = document.getElementById('difficult-words');
+                difficultDiv.innerHTML = difficultWords.map(stat => {
+                    const total = stat.correct_count + stat.wrong_count;
+                    const accuracy = total > 0 ? Math.round((stat.correct_count / total) * 100) : 0;
+                    return `<p>${stat.words.correct_spelling} vs ${stat.words.wrong_spelling} (${accuracy}% correct)</p>`;
+                }).join('');
+            }
+
+            // Load most practiced words (highest attempt count)
+            const { data: practicedWords, error: practicedError } = await supabaseClient
+                .from('word_stats')
+                .select(`
+                    words!inner(correct_spelling, wrong_spelling),
+                    correct_count,
+                    wrong_count
+                `)
+                .order('correct_count', { ascending: false })
+                .limit(5);
+            
+            if (!practicedError && practicedWords) {
+                const practicedDiv = document.getElementById('practiced-words');
+                practicedDiv.innerHTML = practicedWords.map(stat => {
+                    const total = stat.correct_count + stat.wrong_count;
+                    return `<p>${stat.words.correct_spelling} vs ${stat.words.wrong_spelling} (${total} pogingen)</p>`;
+                }).join('');
+            }
+        }
+
+        // CSV import
+        async function importCSV(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const text = e.target.result;
+                const lines = text.split('\n').filter(line => line.trim());
+                const words = lines.map(line => {
+                    const [correct, wrong, difficulty] = line.split(',').map(s => s.trim());
+                    return { correct_spelling: correct, wrong_spelling: wrong, difficulty };
+                });
+                
+                // Show preview
+                document.getElementById('csv-preview').innerHTML = `
+                    <strong>${words.length} woorden gevonden:</strong><br>
+                    ${words.slice(0, 5).map(w => `${w.correct_spelling} vs ${w.wrong_spelling} (${w.difficulty})`).join('<br>')}
+                    ${words.length > 5 ? '<br>...' : ''}
+                    <br><br>
+                    <button class="btn btn-secondary" onclick="executeBulkImport()">Import Uitvoeren</button>
+                `;
+                
+                // Store in global variable for import button
+                window.pendingImport = words;
+            };
+            reader.readAsText(file);
+        }
+
+        // Execute bulk import
+        async function executeBulkImport() {
+            if (!window.pendingImport) {
+                showError('Geen CSV geladen.');
+                return;
+            }
+            
+            const { error } = await supabaseClient
+                .from('words')
+                .insert(window.pendingImport);
+            
+            if (error) {
+                showError('Fout bij importeren: ' + error.message);
+                return;
+            }
+            
+            showSuccess(`${window.pendingImport.length} woorden geïmporteerd!`);
+            window.pendingImport = null;
+            document.getElementById('csv-preview').innerHTML = 'Geen bestand geselecteerd.';
+            await loadWords();
+        }
+
+        // Tab switching
+        function showTab(tabName) {
+            // Hide all sections
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            // Show selected section
+            document.getElementById(tabName).classList.add('active');
+            // Update active tab styling
+            document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        // Logout
+        async function logout() {
+            await supabaseClient.auth.signOut();
+            window.location.href = 'index.html';
+        }
+
+        // Utility functions
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.textContent = message;
+            document.body.insertBefore(errorDiv, document.body.firstChild);
+            setTimeout(() => errorDiv.remove(), 5000);
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success';
+            successDiv.textContent = message;
+            document.body.insertBefore(successDiv, document.body.firstChild);
+            setTimeout(() => successDiv.remove(), 3000);
+        }
+
+        // Initialize on page load
+        checkAuth();
+    </script>
+</body>
+</html>

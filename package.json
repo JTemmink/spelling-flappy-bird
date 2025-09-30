@@ -1,0 +1,30 @@
+{
+  "name": "spelling-flappy-bird",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Educational spelling game based on Flappy Bird mechanics for ages 8-11",
+  "main": "src/main.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "phaser": "^3.80.0",
+    "@supabase/supabase-js": "^2.39.0"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0"
+  },
+  "keywords": [
+    "educational",
+    "spelling",
+    "game",
+    "phaser",
+    "supabase",
+    "dutch"
+  ],
+  "author": "",
+  "license": "MIT"
+}
+

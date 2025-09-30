@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Placeholder Assets</title>
+</head>
+<body>
+    <h2>Placeholder Asset Generator</h2>
+    <p>Open this page in a browser and click the buttons to generate placeholder assets.</p>
+    
+    <canvas id="canvas" width="800" height="600" style="border: 1px solid #000; margin: 10px;"></canvas>
+    <br>
+    
+    <button onclick="generateBird()">Generate Bird (40x40)</button>
+    <button onclick="generateTopPipe()">Generate Top Pipe (80x200)</button>
+    <button onclick="generateBottomPipe()">Generate Bottom Pipe (80x200)</button>
+    <button onclick="generateBackground()">Generate Background (800x600)</button>
+    
+    <script>
+        function generateBird() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 40;
+            canvas.height = 40;
+            const ctx = canvas.getContext('2d');
+            
+            // Bird - yellow circle
+            ctx.fillStyle = '#FFD700';
+            ctx.fillRect(0, 0, 40, 40);
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(0, 0, 40, 40);
+            
+            downloadCanvas(canvas, 'bird.png');
+        }
+        
+        function generateTopPipe() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 80;
+            canvas.height = 200;
+            const ctx = canvas.getContext('2d');
+            
+            // Top pipe - green rectangle
+            ctx.fillStyle = '#228B22';
+            ctx.fillRect(0, 0, 80, 200);
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(0, 0, 80, 200);
+            
+            downloadCanvas(canvas, 'pipe-top.png');
+        }
+        
+        function generateBottomPipe() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 80;
+            canvas.height = 200;
+            const ctx = canvas.getContext('2d');
+            
+            // Bottom pipe - green rectangle
+            ctx.fillStyle = '#228B22';
+            ctx.fillRect(0, 0, 80, 200);
+            ctx.strokeStyle = '#000000';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(0, 0, 80, 200);
+            
+            downloadCanvas(canvas, 'pipe-bottom.png');
+        }
+        
+        function generateBackground() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 800;
+            canvas.height = 600;
+            const ctx = canvas.getContext('2d');
+            
+            // Background - sky blue
+            ctx.fillStyle = '#87CEEB';
+            ctx.fillRect(0, 0, 800, 600);
+            
+            downloadCanvas(canvas, 'background.png');
+        }
+        
+        function downloadCanvas(canvas, filename) {
+            const link = document.createElement('a');
+            link.download = filename;
+            link.href = canvas.toDataURL();
+            link.click();
+            console.log(`Generated ${filename}`);
+        }
+    </script>
+</body>
+</html>
