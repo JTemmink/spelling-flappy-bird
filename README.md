@@ -1,6 +1,3 @@
-# Spelling Flappy Bird - Educational Game
-
-Een educatief spelletje voor kinderen van 8-11 jaar gebaseerd op Flappy Bird mechanieken. Spelers vliegen door poorten met juiste/onjuiste spellingen om Nederlandse spelling te oefenen.
 
 ## Setup Instructies
 
