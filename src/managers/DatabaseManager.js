@@ -372,3 +372,6 @@ export class DatabaseManager {
     }
 }
 
+// Default export for compatibility
+export default DatabaseManager
+

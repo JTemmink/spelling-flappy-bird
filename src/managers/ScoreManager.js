@@ -146,4 +146,5 @@ class ScoreManager {
     }
 }
 
-export default ScoreManager;
+// Default export for compatibility
+export default ScoreManager

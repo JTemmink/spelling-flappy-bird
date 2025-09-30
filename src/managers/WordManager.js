@@ -303,4 +303,5 @@ class WordManager {
     }
 }
 
-export default WordManager;
+// Default export for compatibility
+export default WordManager

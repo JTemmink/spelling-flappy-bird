@@ -8,10 +8,21 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    sourcemap: true
+    sourcemap: true,
+    target: 'esnext',
+    rollupOptions: {
+      input: {
+        main: './index.html'
+      }
+    }
   },
   optimizeDeps: {
     include: ['phaser']
+  },
+  resolve: {
+    alias: {
+      '@': '/src'
+    }
   }
 })
 

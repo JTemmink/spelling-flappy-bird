@@ -266,3 +266,6 @@ export class AuthManager {
     }
 }
 
+// Default export for compatibility
+export default AuthManager
+
